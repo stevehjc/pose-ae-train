@@ -64,3 +64,4 @@ To evaluate on the pretrained model, you can download it from [here](https://umi
 That should return a mAP of about 0.59 for single scale evaluation, and .66 for multiscale (performance can be improved further by evaluating at more than the default 3 scales). Results will not necessarily be the same on the COCO test sets.
 
 To use this model for your own images, you can set up code to pass your own data to the ```multiperson``` function in ```test.py```.
+# pose-ae
