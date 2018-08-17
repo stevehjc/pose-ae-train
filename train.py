@@ -16,7 +16,9 @@ import argparse
 def parse_command_line():
     parser = argparse.ArgumentParser()
     parser.add_argument('-t', '--task', type=str, default='pose', help='task to be trained')
-    parser.add_argument('-c', '--continue_exp', type=str, help='continue exp')
+    # 调试时使用,调试时需要设置命令行参数的默认值，以默认值进入调试
+    parser.add_argument('-c', '--continue_exp', type=str, default='pretrained',help='continue exp') 
+    # parser.add_argument('-c', '--continue_exp', type=str,help='continue exp')
     parser.add_argument('-e', '--exp', type=str, default='pose', help='experiments name')
     parser.add_argument('-m', '--mode', type=str, default='single', help='scale mode')
     args = parser.parse_args()
@@ -102,15 +104,17 @@ def init():
     please check task/base.py
     """
     opt = parse_command_line()
-    task = importlib.import_module('task.' + opt.task)
-    exp_path = os.path.join('exp', opt.exp)
+    # import_module 类似与Python关键字引入模型：import **。优点是带参数，可以在运行过程中引入某一模型
+    task = importlib.import_module('task.' + opt.task) #载入模型配置文件 task/pose.py
+    exp_path = os.path.join('exp', opt.exp) #实验输出文件
 
     config = task.__config__
+    # 如果输出文件不存在，尝试递归创新文件夹
     try: os.makedirs(exp_path)
     except FileExistsError: pass
 
-    config['opt'] = opt
-    config['data_provider'] = importlib.import_module(config['data_provider'])
+    config['opt'] = opt  # 给config增加一项'opt'
+    config['data_provider'] = importlib.import_module(config['data_provider']) #引入data_provider对应的coco数据处理 data/coco_pose/dp.py
 
     func = task.make_network(config)
     reload(config)

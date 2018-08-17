@@ -1,8 +1,13 @@
+# conding=utf-8
 import torch
 from torch import nn
 from models.layers import Conv, Hourglass, Pool
 from extensions.AE.AE_loss import AEloss
 from task.loss import HeatmapLoss
+
+'''
+本文件中的类，继承了nn.Modual，分别重载了__init__函数和forward函数
+'''
 
 class Merge(nn.Module):
     def __init__(self, x_dim, y_dim):

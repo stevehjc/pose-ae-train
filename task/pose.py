@@ -11,9 +11,9 @@ from utils.misc import make_input, make_output, importNet
 
 __config__ = {
     'data_provider': 'data.coco_pose.dp',
-    'network': 'models.posenet.PoseNet',
+    'network': 'models.posenet.PoseNet', # models/posenet.py 中的PoseNet函数
     'inference': {
-        'nstack': 4,
+        'nstack': 4, #堆叠沙漏个数
         'inp_dim': 256,
         'oup_dim': 68,
         'num_parts': 17,
@@ -21,11 +21,11 @@ __config__ = {
         'keys': ['imgs']
     },
 
-    'train': {
-        'batchsize': 32,
-        'input_res': 512,
-        'output_res': 128,
-        'train_iters': 1000,
+    'train': {  
+        'batchsize': 2, # 原始设置为32
+        'input_res': 512, # 输入图像尺寸
+        'output_res': 128, # 输出特征图尺寸
+        'train_iters': 1000, 
         'valid_iters': 10,
         'learning_rate': 2e-4,
         'num_loss': 4,
@@ -72,13 +72,13 @@ class Trainer(nn.Module):
             return list(res) + list(self.calc_loss(*res, **labels))
 
 def make_network(configs):
-    PoseNet = importNet(configs['network'])
+    PoseNet = importNet(configs['network']) # models/posenet.py 中的PoseNet函数
     train_cfg = configs['train']
     config = configs['inference']
 
     poseNet = PoseNet(**config)
 
-    forward_net = DataParallel(poseNet.cuda())
+    forward_net = DataParallel(poseNet.cuda()) #为什么poseNet有cuda()方法，因为poseNet继承了nn.Module
     def calc_loss(*args, **kwargs):
         return poseNet.calc_loss(*args, **kwargs)
 

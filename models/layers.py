@@ -1,3 +1,4 @@
+# conding=utf-8
 from torch import nn
 from torch.autograd import Function
 import sys 
@@ -59,11 +60,11 @@ class Conv(nn.Module):
 
 class Hourglass(nn.Module):
     def __init__(self, n, f, bn=None, increase=128):
-        super(Hourglass, self).__init__()
+        super(Hourglass, self).__init__()  # super() 函数是用于调用父类(超类)的一个方法。
         nf = f + increase
         self.up1 = Conv(f, f, 3, bn=bn)
         # Lower branch
-        self.pool1 = Pool(2, 2)
+        self.pool1 = Pool(2, 2) #最大池化层，降采样
         self.low1 = Conv(f, nf, 3, bn=bn)
         # Recursive hourglass
         if n > 1:
@@ -71,7 +72,7 @@ class Hourglass(nn.Module):
         else:
             self.low2 = Conv(nf, nf, 3, bn=bn)
         self.low3 = Conv(nf, f, 3)
-        self.up2  = nn.UpsamplingNearest2d(scale_factor=2)
+        self.up2  = nn.UpsamplingNearest2d(scale_factor=2) # 上采样，最近邻
 
     def forward(self, x):
         up1  = self.up1(x)

@@ -1,3 +1,4 @@
+# coding=utf-8
 import cv2
 import torch
 import tqdm
@@ -9,7 +10,8 @@ from data.coco_pose.ref import ref_dir, flipRef
 from utils.misc import get_transform, kpt_affine, resize
 from utils.group import HeatmapParser
 
-valid_filepath = ref_dir + '/validation.pkl'
+# coco测试集由data/coco_pose/valid_id中的图像组成，共500张，使用utils/build_valid.py转换为validation.pkl
+valid_filepath = ref_dir + '/validation.pkl'  
 
 parser = HeatmapParser(detection_val=0.1)
 
