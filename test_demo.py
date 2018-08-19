@@ -18,7 +18,7 @@ test_demo.py将原来test.py引用train.py中初始化init等函数变成不依�
 并且支持命令行解析输入图像和输出图像
 '''
 
-# valid_filepath = ref_dir + '/validation.pkl'
+valid_filepath = ref_dir + '/validation.pkl'
 
 H_parser = HeatmapParser(detection_val=0.1)
 
@@ -128,31 +128,32 @@ def multiperson(img, func, mode):
     for idx, i in enumerate(scales):
         scale = max(height, width)/200
         input_res = max(height, width)
-        inp_res = int((i * 512 + 63)//64 * 64)
+        inp_res = int((i * 512 + 63)//64 * 64)  # 改变输入图像分辨率，为512的倍数；
         res = (inp_res, inp_res)  #resize后的图像分辨率、尺寸大小
 
         mat_ = get_transform(center, scale, res)[:2]
         inp = cv2.warpAffine(img, mat_, res)/255
 
-        def array2dict(tmp):
+        def array2dict(tmp):  # 输入tmp.shape=[1,4,68,128,128]；4个堆叠沙漏模块每个都输出68个特征图，前17个为关键点detection scores，17-34为多个标签编码
             return {
-                'det': tmp[0][:,:,:17],
-                'tag': tmp[0][:,-1, 17:34]
+                'det': tmp[0][:,:,:17],  #det shape=[1,4,17,128,128] 68维度里面的前17个
+                'tag': tmp[0][:,-1, 17:34] #tag shape=[1,17,128,128] 4维度里面的最后一个，以及68维度里面17至34个
             }
 
+        # 神经网络计算,核心过程,func()
         tmp1 = array2dict(func([inp]))
-        tmp2 = array2dict(func([inp[:,::-1]]))
+        tmp2 = array2dict(func([inp[:,::-1]]))  #inp左右翻转
 
         tmp = {}
         for ii in tmp1:
-            tmp[ii] = np.concatenate((tmp1[ii], tmp2[ii]),axis=0)
-
-        det = tmp['det'][0, -1] + tmp['det'][1, -1, :, :, ::-1][flipRef]
-        if det.max() > 10:
-            continue
+            tmp[ii] = np.concatenate((tmp1[ii], tmp2[ii]),axis=0)  #'det'和‘tag’第一维度扩展
+        # [128 128]：[row col]，左右翻转，所以row不变，col倒序。
+        det = tmp['det'][0, -1] + tmp['det'][1, -1, :, :, ::-1][flipRef]  #tmp中‘det' shape=[2<0>,4<-1>,17,128,128] ；’det' shape=[2<1>,4<-1>,17,128,128<-1>][左右翻转]
+        if det.max() > 10: # 最终得到det.shape=[17,128,128]；det表示特征图[128,128]的每个坐标是17种关键点的预测分数
+            continue  #为什么？？
         if dets is None:
             dets = det
-            mat = np.linalg.pinv(np.array(mat_).tolist() + [[0,0,1]])[:2]
+            mat = np.linalg.pinv(np.array(mat_).tolist() + [[0,0,1]])[:2]  #仿射变换矩阵求逆过程
         else:
             dets = dets + resize(det, dets.shape[1:3]) 
 
@@ -163,10 +164,10 @@ def multiperson(img, func, mode):
     if dets is None or len(tags) == 0:
         return [], []
 
-    tags = np.concatenate([i[:,:,:,None] for i in tags], axis=3)
-    dets = dets/len(scales)/2
+    tags = np.concatenate([i[:,:,:,None] for i in tags], axis=3) #将[2,17,128,128]-->[17,128,128,2]
+    dets = dets/len(scales)/2  #上面通过左右翻转图像相加，这里除以2求平均
     
-    dets = np.minimum(dets, 1)
+    dets = np.minimum(dets, 1) #dets中所有元素和1比较大小，取最小值；这里可以认为将网络得到的detection scores限制在1以下，用来作为检测概率值
     grouped = H_parser.parse(np.float32([dets]), np.float32([tags]))[0]
 
 

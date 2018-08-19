@@ -15,7 +15,7 @@ __config__ = {
     'inference': {
         'nstack': 4, #堆叠沙漏个数
         'inp_dim': 256,
-        'oup_dim': 68,
+        'oup_dim': 68, #论文中输出特征图维度应该为34，但是代码和训练模型是按照68训练的；作者解释说这是之前就项目中的，本项目中只使用了前34维
         'num_parts': 17,
         'increase': 128,
         'keys': ['imgs']
@@ -24,7 +24,7 @@ __config__ = {
     'train': {  
         'batchsize': 2, # 原始设置为32
         'input_res': 512, # 输入图像尺寸
-        'output_res': 128, # 输出特征图尺寸
+        'output_res': 128, # 输出特征图尺寸，相对于输入尺寸，缩小了4倍
         'train_iters': 1000, 
         'valid_iters': 10,
         'learning_rate': 2e-4,
@@ -148,4 +148,5 @@ def make_network(configs):
                 result = [result]
             out['preds'] = [make_output(i) for i in result]
             return out
+
     return make_train
