@@ -1,6 +1,7 @@
-## 这里的代码是从 https://github.com/umich-vl/pose-ae-train 搬运过来的，结合自己的理解，增加了一部分注释，同时增加了test_demo.py，用来实现单张图像的检测
+Fork from https://github.com/umich-vl/pose-ae-train
 
-## 以下是原作者的README
+>结合自己的理解，增加了一部分注释，同时增加了test_demo.py，用来实现单张图像的检测
+
 
 ***
 
